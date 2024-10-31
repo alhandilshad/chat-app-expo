@@ -3,8 +3,10 @@ import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import MaskedView from '@react-native-masked-view/masked-view';
 import GradientButton from '@/components/GradientButton'
+import { useRouter } from 'expo-router';
 
 export default function WelcomeScreen() {
+  const router = useRouter()
   return (
     <View style={{
         height: '100%',
@@ -53,7 +55,7 @@ export default function WelcomeScreen() {
         marginBottom: 50
       }}>Connect with freinds and family securely and private. Enjoy!</Text>
 
-      <GradientButton text='Get Started' />
+      <GradientButton text='Get Started' click={() => router.push('/auth/sign-in')} />
     </View>
   )
 }
