@@ -3,10 +3,14 @@ import React, { useEffect, useState } from 'react'
 import { useNavigation, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons';
 import GradientButton from '../../../components/GradientButton'
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '../../../config/firebaseConfig';
 
 const { width, height } = Dimensions.get('window');
 
 export default function signIn() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
     const navigation = useNavigation();
     const router = useRouter();
 
@@ -15,6 +19,24 @@ export default function signIn() {
             headerShown: false,
         })
     }, [])
+
+    const handleSignIn = () => {
+      if (!email || !password) {
+        ToastAndroid.show('Please fill in all the fields', ToastAndroid.LONG);
+        return;
+      }
+      signInWithEmailAndPassword(auth, email, password)
+        .then((response) => {
+          router.replace('/(tabs)/home')
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          if(errorCode === 'auth/invalid-credential'){
+            ToastAndroid.show('Invalid email or password', ToastAndroid.LONG);
+          }
+        });
+    }
 
   return (
     <View style={{
@@ -40,7 +62,7 @@ export default function signIn() {
         marginTop: height * 0.05,
       }}>
         <Text>Email</Text>
-        <TextInput placeholder='Enter email' style={styles.input} />
+        <TextInput placeholder='Enter email' style={styles.input} onChangeText={setEmail} />
       </View>
 
       <View style={{
@@ -48,10 +70,10 @@ export default function signIn() {
         marginBottom: height * 0.07,
       }}>
         <Text>Password</Text>
-        <TextInput placeholder='Enter password' secureTextEntry={true} style={styles.input} />
+        <TextInput placeholder='Enter password' secureTextEntry={true} style={styles.input} onChangeText={setPassword} />
       </View>
 
-      <GradientButton text='Sign In' />
+      <GradientButton text='Sign In' click={handleSignIn} />
 
       <TouchableOpacity onPress={() => router.replace('/auth/sign-up')} style={{
         paddingVertical: height * 0.025,

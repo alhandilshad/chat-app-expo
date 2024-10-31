@@ -4,19 +4,46 @@ import { useNavigation, useRouter } from "expo-router";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import GradientButton from "../../../components/GradientButton";
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "../../../config/firebaseConfig";
+import { setDoc, doc } from "firebase/firestore";
 
 const { width, height } = Dimensions.get("window");
 
 export default function SignUp() {
   const navigation = useNavigation();
   const router = useRouter();
-  const [current, setCurrent] = useState("test");
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [current, setCurrent] = useState("Male");
 
   useEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
   }, []);
+
+  const handleSignUp = () => {
+    if (name === '' || email === '' || password === '') {
+      ToastAndroid.show("Please fill all fields", ToastAndroid.LONG);
+      return;
+    }
+    
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(async (response) => {
+        const uid = response.user.uid;
+        const userData = { name, email, uid, gender:current, followers: [], following: [], bio: '', userName: '' };
+        await setDoc(doc(db, "users", uid), userData);
+        router.replace('/(tabs)/home')
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error(errorCode, errorMessage);
+        // ..
+      });
+  }
 
   return (
     <View style={styles.container}>
@@ -27,12 +54,12 @@ export default function SignUp() {
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Full Name</Text>
-        <TextInput placeholder="Enter full name" style={styles.input} />
+        <TextInput placeholder="Enter full name" style={styles.input} onChangeText={setName} />
       </View>
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Email</Text>
-        <TextInput placeholder="Enter email" style={styles.input} />
+        <TextInput placeholder="Enter email" style={styles.input} onChangeText={setEmail} />
       </View>
 
       <View style={styles.inputContainer}>
@@ -41,6 +68,7 @@ export default function SignUp() {
           placeholder="Enter password"
           secureTextEntry={true}
           style={styles.input}
+          onChangeText={setPassword}
         />
       </View>
 
@@ -67,7 +95,7 @@ export default function SignUp() {
       </RadioButtonGroup>
     </View>
 
-      <GradientButton text='Create Account' />
+      <GradientButton text='Create Account' click={handleSignUp} />
 
       <TouchableOpacity onPress={() => router.replace('auth/sign-in')} style={styles.signInButton}>
         <Text style={styles.signInButtonText}>Sign In</Text>
@@ -94,7 +122,7 @@ const styles = StyleSheet.create({
     fontSize: width * 0.04,
   },
   input: {
-    padding: height * 0.02,
+    padding: height * 0.018,
     borderWidth: 1.2,
     borderRadius: width * 0.03,
     borderColor: 'blue',
