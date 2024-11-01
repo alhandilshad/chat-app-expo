@@ -1,11 +1,15 @@
-import { View, Text } from 'react-native'
-import React, { useEffect } from 'react'
+import { View, Text, TouchableOpacity, Image } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { useNavigation } from 'expo-router'
-
 import {LinearGradient} from'expo-linear-gradient'
+import { onSnapshot, collection } from 'firebase/firestore'
+import { db, auth } from '../../config/firebaseConfig'
+import { onAuthStateChanged } from 'firebase/auth'
 
 export default function user() {
     const navigation = useNavigation();
+    const [userlist, setUserlist] = useState([]);
+    const [currentUserEmail, setcurrentUserEmail] = useState();
 
     useEffect(() => {
         navigation.setOptions({
@@ -20,7 +24,31 @@ export default function user() {
                 </LinearGradient>
               ),
         })
-    })
+        getUsers()
+    }, [navigation])
+
+    useEffect(() => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          setcurrentUserEmail(user.email);
+        }else{
+          console.log("User is signed out");
+        }
+      });
+      return () => unsubscribe();
+    }, []);
+
+    const getUsers = () => {
+      const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
+        const list = [];
+        snapshot.forEach((doc) => {
+          list.push(doc.data());
+        });
+        setUserlist(list);
+      });
+      return unsubscribe;
+    };
+
   return (
     <View style={{
         backgroundColor: 'white',
@@ -28,7 +56,45 @@ export default function user() {
         paddingTop: 20,
         padding: 20
     }}>
-      <Text>user</Text>
+      {userlist.filter((user) => user.email !== currentUserEmail).map((user, index) => (
+        <TouchableOpacity key={index} style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 10,
+          marginBottom: 10,
+          padding: 10,
+          borderRadius: 10,
+          backgroundColor: 'white',
+          shadowColor: 'blue',
+          shadowOffset: { width: 4, height: 4 },
+          shadowOpacity: 0.6,
+          shadowRadius: 6,
+          elevation: 5,
+          borderWidth: 0.4,
+          borderColor: 'blue'
+        }}>
+          <Image source={user.gender === 'Male' ? require('../../assets/images/download.jpg') : require('../../assets/images/download (1).jpg')} style={{
+            width: 70,
+            height: 70,
+            borderRadius: 40,
+            backgroundColor: 'lightgray',
+            borderWidth: 0.5,
+            borderColor: 'blue'
+          }}></Image>
+          <View>
+            <Text style={{
+              fontWeight: 'bold',
+              fontSize: 20,
+              color: 'black'
+            }}>{user.name}</Text>
+            <Text style={{
+              fontSize: 14,
+              color: 'gray'
+            }}>{user.email}</Text>
+          </View>
+        </TouchableOpacity>
+      ))}
     </View>
   )
 }
