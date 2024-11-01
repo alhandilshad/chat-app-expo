@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 
-export default function GradientButton({ text, click }) {
+export default function GradientButton({ text, click, PV }) {
   return (
     <TouchableOpacity onPress={click} style={{ width: '100%' }}>
         <LinearGradient
@@ -10,7 +10,7 @@ export default function GradientButton({ text, click }) {
           end={{ x: 1, y: 1 }}
           colors={['#3b82f6', '#9333ea']}
           style={{
-            paddingVertical: 12,
+            paddingVertical: PV ? PV : 12,
             alignItems: 'center',
             borderRadius: 8,
           }}
