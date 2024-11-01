@@ -14,6 +14,7 @@ import { onSnapshot, collection, where, query } from "firebase/firestore";
 import { db, auth } from "../../config/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import GradientButton from "../../components/GradientButton";
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 export default function profile() {
   const navigation = useNavigation();
@@ -66,19 +67,21 @@ export default function profile() {
   }, [currentUserUid]);
 
   return (
-    <View
-      style={{
-        backgroundColor: "white",
-        height: "100%",
-      }}
-    >
+    <ScrollView style={{
+      backgroundColor: 'white',
+    }} >
+      <View style={{
+        alignItems: "center",
+      }}>
       <LinearGradient
         colors={["#3b82f6", "#9333ea"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={{ height: 90, alignItems: "center",paddingHorizontal: 20, paddingTop: 10 }}
+        style={{ height: 90, width: '100%' }}
       >
-        <Image
+      </LinearGradient>
+
+      <Image
           source={
             currentUserData?.gender === "Male"
               ? require("../../assets/images/download.jpg")
@@ -90,9 +93,11 @@ export default function profile() {
             borderRadius: 75,
             borderWidth: 1,
             borderColor: "white",
+            position: 'absolute',
+            top: 15,
           }}
         ></Image>
-        <Text style={{ fontWeight: "bold", fontSize: 22 }}>
+        <Text style={{ fontWeight: "bold", fontSize: 22, marginTop: 80 }}>
           {currentUserData?.name}
         </Text>
         <Text style={{ fontSize: 18, color: 'gray' }}>
@@ -135,8 +140,65 @@ export default function profile() {
           </View>
         </View>
 
+        <View style={{
+          width: '80%'
+        }}>
         <GradientButton text='Edit Profile' PV={10} />
-      </LinearGradient>
+        </View>
+
+        <View style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: 30,
+          width: '80%',
+          paddingBottom: 6,
+          borderBottomWidth: 1,
+          borderBottomColor: 'gray'
+        }}>
+          <Text style={{
+            fontWeight: 'bold',
+            fontSize: 22
+          }}>My Posts</Text>
+          <TouchableOpacity>
+            <AntDesign name="pluscircle" size={34} color="black" />
+          </TouchableOpacity>
+        </View>
+        <View style={{
+          display: 'flex',
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          marginTop: 10,
+          marginBottom: 50,
+          width: '80%'
+        }}>
+          <View style={{width: '33%', height: 80, borderWidth: 1, borderColor: 'black'}}></View>
+          <View style={{width: '33%', height: 80, borderWidth: 1, borderColor: 'black'}}></View>
+          <View style={{width: '33%', height: 80, borderWidth: 1, borderColor: 'black'}}></View>
+        </View>
+
+        <View style={{
+          width: '80%'
+        }}>
+        <GradientButton text='Logout' PV={10} />
+        </View>
+
+        <TouchableOpacity style={{
+          width: '80%',
+          borderWidth: 2,
+          borderColor: 'red',
+          marginTop: 20,
+          padding: 10,
+          borderRadius: 10,
+          marginBottom: 50
+        }}>
+          <Text style={{
+            textAlign: 'center',
+            color:'red'
+          }}>Delete Account</Text>
+        </TouchableOpacity>
     </View>
+    </ScrollView>
   );
 }
