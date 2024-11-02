@@ -5,7 +5,8 @@ import {
   TextInput,
   Image,
   ToastAndroid,
-  ScrollView
+  ScrollView,
+  Modal
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "expo-router";
@@ -15,11 +16,13 @@ import { db, auth } from "../../config/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import GradientButton from "../../components/GradientButton";
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { Feather } from "@expo/vector-icons";
 
 export default function profile() {
   const navigation = useNavigation();
   const [currentUserData, setCurrentUserData] = useState();
   const [currentUserUid, setCurrentUserUid] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     navigation.setOptions({
@@ -161,7 +164,7 @@ export default function profile() {
             fontWeight: 'bold',
             fontSize: 22
           }}>My Posts</Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => setModalVisible(true)}>
             <AntDesign name="pluscircle" size={34} color="black" />
           </TouchableOpacity>
         </View>
@@ -199,6 +202,59 @@ export default function profile() {
           }}>Delete Account</Text>
         </TouchableOpacity>
     </View>
+    
+    {/* Create post modal */}
+    <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          }}>
+            <View style={{
+              width: '80%',
+              padding: 20,
+              backgroundColor: 'white',
+              borderRadius: 10,
+              alignItems: 'center'
+            }}>
+              <Feather name="x" size={30} style={{ alignSelf: 'flex-end' }} onPress={() => setModalVisible(false)} />
+              <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Add New Post</Text>
+              <TextInput
+                placeholder="Title"
+                style={{
+                  width: '100%',
+                  borderWidth: 1,
+                  borderColor: 'gray',
+                  borderRadius: 5,
+                  padding: 10,
+                  marginTop: 15
+                }}
+              />
+              <TextInput
+                placeholder="Description"
+                style={{
+                  width: '100%',
+                  borderWidth: 1,
+                  borderColor: 'gray',
+                  borderRadius: 5,
+                  padding: 10,
+                  marginTop: 15
+                }}
+                multiline
+                numberOfLines={4}
+              />
+              <View style={{ width: '60%', marginTop: 20 }}>
+                <GradientButton text='Create Post' PV={10} />
+              </View>
+            </View>
+          </View>
+        </Modal>
     </ScrollView>
   );
 }
