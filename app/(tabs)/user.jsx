@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, Image } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { useNavigation } from 'expo-router'
+import { useNavigation, useRouter } from 'expo-router'
 import {LinearGradient} from'expo-linear-gradient'
 import { onSnapshot, collection } from 'firebase/firestore'
 import { db, auth } from '../../config/firebaseConfig'
@@ -8,6 +8,7 @@ import { onAuthStateChanged } from 'firebase/auth'
 
 export default function user() {
     const navigation = useNavigation();
+    const router = useRouter();
     const [userlist, setUserlist] = useState([]);
     const [currentUserEmail, setcurrentUserEmail] = useState();
 
@@ -57,7 +58,12 @@ export default function user() {
         padding: 20
     }}>
       {userlist.filter((user) => user.email !== currentUserEmail).map((user, index) => (
-        <TouchableOpacity key={index} style={{
+        <TouchableOpacity onPress={() => router.push({
+          pathname: '/otherScreens/userProfile',
+          params: {
+            userData: JSON.stringify(user)
+          }
+        })} key={index} style={{
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
@@ -74,14 +80,25 @@ export default function user() {
           borderWidth: 0.4,
           borderColor: 'blue'
         }}>
-          <Image source={user.gender === 'Male' ? require('../../assets/images/download.jpg') : require('../../assets/images/download (1).jpg')} style={{
-            width: 70,
-            height: 70,
-            borderRadius: 40,
-            backgroundColor: 'lightgray',
-            borderWidth: 0.5,
-            borderColor: 'blue'
-          }}></Image>
+          {user.profileImg ? (
+            <Image source={{ uri: user.profileImg }} style={{
+              width: 70,
+              height: 70,
+              borderRadius: 40,
+              backgroundColor: 'lightgray',
+              borderWidth: 0.5,
+              borderColor: 'blue'
+            }}></Image>
+          ) : (
+            <Image source={user.gender === 'Male' ? require('../../assets/images/download.jpg') : require('../../assets/images/download (1).jpg')} style={{
+              width: 70,
+              height: 70,
+              borderRadius: 40,
+              backgroundColor: 'lightgray',
+              borderWidth: 0.5,
+              borderColor: 'blue'
+            }}></Image>
+          )}
           <View>
             <Text style={{
               fontWeight: 'bold',
