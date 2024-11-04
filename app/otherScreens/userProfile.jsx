@@ -21,27 +21,19 @@ import {
   export default function profile() {
     const item = useLocalSearchParams();
     const user = JSON.parse(item.userData);
-    console.log(user, 'user');
     
     const navigation = useNavigation();
     const [currentUserData, setCurrentUserData] = useState();
+    const [profileUser, setprofileUser] = useState();
     const [currentUserUid, setCurrentUserUid] = useState("");
     const [modalVisible, setModalVisible] = useState(false);
-  
+
     useEffect(() => {
       navigation.setOptions({
-        header: () => (
-          <LinearGradient
-            colors={["#3b82f6", "#9333ea"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ height: 60, alignItems: "center", paddingTop: 20 }}
-          >
-            <Text style={{ fontWeight: "bold", color: "white", fontSize: 22 }}>
-              Profile
-            </Text>
-          </LinearGradient>
-        ),
+        headerShown: true,
+        headerTransparent: true,
+        headerTitle: '',
+        headerTintColor: 'white'
       });
     }, [navigation]);
   
@@ -57,21 +49,19 @@ import {
     }, []);
   
     useEffect(() => {
-      if (!currentUserUid) return;
-  
       const userQuery = query(
         collection(db, "users"),
-        where("uid", "==", currentUserUid)
+        where("uid", "==", user?.uid)
       );
   
       const unsubscribe = onSnapshot(userQuery, (snapshot) => {
         snapshot.forEach((doc) => {
-          setCurrentUserData(doc.data());
+          setprofileUser(doc.data());
         });
       });
   
       return () => unsubscribe();
-    }, [currentUserUid]);
+    }, [user?.uid]);
   
     return (
       <ScrollView style={{
@@ -84,13 +74,14 @@ import {
           colors={["#3b82f6", "#9333ea"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={{ height: 90, width: '100%' }}
+          style={{ height: 130, width: '100%' }}
         >
         </LinearGradient>
   
         <Image
             source={
-              user?.gender === "Male"
+              profileUser?.profileImg ? { uri: profileUser.profileImg } :
+              profileUser?.gender === "Male"
                 ? require("../../assets/images/download.jpg")
                 : require("../../assets/images/download (1).jpg")
             }
@@ -98,22 +89,22 @@ import {
               width: 150,
               height: 150,
               borderRadius: 75,
-              borderWidth: 1,
+              borderWidth: 2,
               borderColor: "white",
               position: 'absolute',
-              top: 15,
+              top: 50,
             }}
           ></Image>
           <Text style={{ fontWeight: "bold", fontSize: 22, marginTop: 80 }}>
-            {user?.name}
+            {profileUser?.name}
           </Text>
           <Text style={{ fontSize: 18, color: 'gray' }}>
-            {user?.email}
+            {profileUser?.email}
           </Text>
           <Text style={{
               fontSize: 16,
               marginTop: 5
-          }}>{user?.bio ? user?.bio : user?.gender === 'Male' ? 'I am a boy' : 'I am a girl'}</Text>
+          }}>{profileUser?.bio ? profileUser?.bio : profileUser?.gender === 'Male' ? 'I am a boy' : 'I am a girl'}</Text>
   
           <View style={{
             display: 'flex',
@@ -128,7 +119,7 @@ import {
                 textAlign: 'center',
                 fontWeight: 'bold',
                 fontSize: 24
-              }}>{user?.followers?.length}</Text>
+              }}>{profileUser?.followers?.length}</Text>
               <Text style={{
                 fontWeight: 'bold',
                 fontSize: 18
@@ -139,7 +130,7 @@ import {
                 textAlign: 'center',
                 fontWeight: 'bold',
                 fontSize: 24
-              }}>{user?.following?.length}</Text>
+              }}>{profileUser?.following?.length}</Text>
               <Text style={{
                 fontWeight: 'bold',
                 fontSize: 18
