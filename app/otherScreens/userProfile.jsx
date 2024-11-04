@@ -23,7 +23,6 @@ import {
 import { db, auth } from "../../config/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import GradientButton from "../../components/GradientButton";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import { Feather } from "@expo/vector-icons";
 
 export default function profile() {
@@ -34,7 +33,9 @@ export default function profile() {
   const [currentUserData, setCurrentUserData] = useState();
   const [profileUser, setprofileUser] = useState();
   const [currentUserUid, setCurrentUserUid] = useState("");
-  const [modalVisible, setModalVisible] = useState(false);
+  const [followModal, setFollowModal] = useState(false);
+  const [modelType, setmodelType] = useState();
+  const [followList, setfollowList] = useState([]);
   const [profilePosts, setProfilePosts] = useState([]);
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -241,14 +242,18 @@ export default function profile() {
             >
               {profileUser?.followers?.length}
             </Text>
-            <Text
-              style={{
-                fontWeight: "bold",
-                fontSize: 18,
+            <TouchableOpacity
+              onPress={() => {
+                setFollowModal(true)
+                setmodelType("followers");
+                setfollowList(profileUser.followers || []);
               }}
             >
-              Followers
-            </Text>
+              <Text style={{
+                fontSize: 18,
+                fontWeight: 'bold'
+              }}>Followers</Text>
+            </TouchableOpacity>
           </View>
           <View>
             <Text
@@ -260,14 +265,18 @@ export default function profile() {
             >
               {profileUser?.following?.length}
             </Text>
-            <Text
-              style={{
-                fontWeight: "bold",
-                fontSize: 18,
+            <TouchableOpacity
+              onPress={() => {
+                setFollowModal(true)
+                setmodelType("following");
+                setfollowList(profileUser?.following || []);
               }}
             >
-              Following
-            </Text>
+              <Text style={{
+                fontSize: 18, 
+                fontWeight: 'bold'
+              }}>Following</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -400,8 +409,8 @@ export default function profile() {
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        visible={followModal}
+        onRequestClose={() => setFollowModal(false)}
       >
         <View
           style={{
@@ -424,37 +433,23 @@ export default function profile() {
               name="x"
               size={30}
               style={{ alignSelf: "flex-end" }}
-              onPress={() => setModalVisible(false)}
+              onPress={() => setFollowModal(false)}
             />
-            <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-              Add New Post
+            <Text style={{ fontSize: 22, fontWeight: "bold", marginBottom: 20 }}>
+              {modelType === 'followers' ? 'Followers' : 'Following'}
             </Text>
-            <TextInput
-              placeholder="Title"
-              style={{
-                width: "100%",
-                borderWidth: 1,
-                borderColor: "gray",
-                borderRadius: 5,
-                padding: 10,
-                marginTop: 15,
-              }}
-            />
-            <TextInput
-              placeholder="Description"
-              style={{
-                width: "100%",
-                borderWidth: 1,
-                borderColor: "gray",
-                borderRadius: 5,
-                padding: 10,
-                marginTop: 15,
-              }}
-              multiline
-              numberOfLines={4}
-            />
-            <View style={{ width: "60%", marginTop: 20 }}>
-              <GradientButton text="Create Post" PV={10} />
+            <View>
+              {followList.length > 0 ? (
+                followList.map((item, index) => (
+                  <Text key={index} style={{
+                    marginBottom: 5,
+                    fontSize: 18,
+                    textAlign: 'center'
+                  }}>{item}</Text>
+                ))
+              ) : (
+                <Text>No {modelType} yet</Text>
+              )}
             </View>
           </View>
         </View>
