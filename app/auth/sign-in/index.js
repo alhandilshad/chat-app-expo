@@ -21,7 +21,6 @@ export default function signIn() {
     }, [])
 
     const handleSignIn = () => {
-      console.log('button is clicked')
       if (!email || !password) {
         ToastAndroid.show('Please fill in all the fields', ToastAndroid.LONG);
         return;
