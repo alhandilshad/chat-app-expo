@@ -21,6 +21,7 @@ export default function signIn() {
     }, [])
 
     const handleSignIn = () => {
+      console.log('button is clicked')
       if (!email || !password) {
         ToastAndroid.show('Please fill in all the fields', ToastAndroid.LONG);
         return;
@@ -32,6 +33,7 @@ export default function signIn() {
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
+          console.log(errorMessage)
           if(errorCode === 'auth/invalid-credential'){
             ToastAndroid.show('Invalid email or password', ToastAndroid.LONG);
           }
