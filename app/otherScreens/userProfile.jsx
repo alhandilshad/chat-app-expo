@@ -39,6 +39,8 @@ export default function profile() {
   const [profilePosts, setProfilePosts] = useState([]);
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [postModal, setPostModal] = useState(false);
+  const [postData, setPostData] = useState();
 
   useEffect(() => {
     navigation.setOptions({
@@ -376,6 +378,10 @@ export default function profile() {
           {profilePosts?.length > 0 ? (
             profilePosts?.map((post, index) => (
               <TouchableOpacity
+                onPress={() => {
+                  setPostModal(true)
+                  setPostData(post)
+                }}
                 key={index}
                 style={{
                   width: "33%",
@@ -405,7 +411,7 @@ export default function profile() {
         </View>
       </View>
 
-      {/* Create post modal */}
+      {/* Create followers modal */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -451,6 +457,56 @@ export default function profile() {
                 <Text>No {modelType} yet</Text>
               )}
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Create Post Modal */}
+      <Modal
+        visible={postModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setPostModal(false)}
+      >
+        <View style={{
+          flex: 1,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          justifyContent: "center",
+          alignItems: "center",
+        }}>
+          <View style={{
+            width: "80%",
+            backgroundColor: "white",
+            borderRadius: 10,
+            padding: 20,
+            alignItems: "center",
+          }}>
+            <Text style={{
+              fontSize: 18,
+              fontWeight: "bold",
+              marginBottom: 10,
+            }}>{postData?.title}</Text>
+            <Image source={{ uri: postData?.imageURL }} style={{
+              width: "100%",
+              height: 200,
+              resizeMode: "cover",
+              marginBottom: 10,
+            }} />
+            <Text style={{
+              fontSize: 16,
+              textAlign: "center",
+              marginBottom: 20,
+            }}>{postData?.description}</Text>
+            <TouchableOpacity onPress={() => setPostModal(false)} style={{
+              backgroundColor: "#2196F3",
+              padding: 10,
+              borderRadius: 5,
+            }}>
+              <Text style={{
+                color: "white",
+                fontWeight: "bold",
+              }}>Close</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
