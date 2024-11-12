@@ -481,6 +481,12 @@ export default function profile() {
             padding: 20,
             alignItems: "center",
           }}>
+            <Feather
+              name="x"
+              size={30}
+              style={{ alignSelf: "flex-end" }}
+              onPress={() => setPostModal(false)}
+            />
             <Text style={{
               fontSize: 18,
               fontWeight: "bold",
@@ -497,16 +503,6 @@ export default function profile() {
               textAlign: "center",
               marginBottom: 20,
             }}>{postData?.description}</Text>
-            <TouchableOpacity onPress={() => setPostModal(false)} style={{
-              backgroundColor: "#2196F3",
-              padding: 10,
-              borderRadius: 5,
-            }}>
-              <Text style={{
-                color: "white",
-                fontWeight: "bold",
-              }}>Close</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </Modal>
