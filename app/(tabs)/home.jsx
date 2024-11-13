@@ -150,7 +150,7 @@ export default function Home() {
           </View>
           <TouchableOpacity onPress={handleLikePress} style={{ marginTop: 4 }} activeOpacity={0.7}>
             <Animated.View style={{ transform: [{ scale: scaleAnimation }] }}>
-              <FontAwesome name={isLiked ? 'heart' : 'heart-o'} size={24} color={isLiked ? 'red' : 'black'} />
+              <FontAwesome name={isLiked ? 'heart' : 'heart-o'} size={25} color={isLiked ? 'red' : 'black'} />
             </Animated.View>
           </TouchableOpacity>
           <TouchableOpacity>
