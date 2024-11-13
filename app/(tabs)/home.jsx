@@ -87,13 +87,16 @@ export default function home() {
             width: '100%',
             height: 200,
             borderRadius: 10,
+            marginTop: 10
           }}></Image>
         </View>
+        <Text>{item?.title}</Text>
+        <Text>{item?.posterName} {item?.description}</Text>
       </View>
   );
 
   return (
-      <ScrollView style={styles.container}>
+      <ScrollView style={styles.container} contentContainerStyle={{flexGrow: 1, paddingBottom: 20}}>
           <FlatList
               data={posts}
               renderItem={renderPost}
@@ -107,7 +110,6 @@ export default function home() {
 const styles = StyleSheet.create({
   container: {
       backgroundColor: 'white',
-      flex: 1,
       padding: 20,
   },
 });
