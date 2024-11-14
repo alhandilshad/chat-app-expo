@@ -24,6 +24,7 @@ import { db, auth } from "../../config/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import GradientButton from "../../components/GradientButton";
 import { Feather } from "@expo/vector-icons";
+import moment from "moment";
 
 export default function profile() {
   const item = useLocalSearchParams();
@@ -228,13 +229,24 @@ export default function profile() {
           style={{
             display: "flex",
             flexDirection: "row",
+            alignItems: 'center',
             justifyContent: "space-around",
             marginTop: 20,
-            width: "100%",
+            width: "90%",
             marginBottom: 20,
           }}
         >
           <View>
+            <Text
+              style={{
+                textAlign: "center",
+                fontWeight: "bold",
+                fontSize: 24,
+              }}
+            >{profilePosts?.length}</Text>
+            <Text>Posts</Text>
+          </View>
+          <View style={{ marginLeft: 22 }}>
             <Text
               style={{
                 textAlign: "center",
@@ -252,8 +264,7 @@ export default function profile() {
               }}
             >
               <Text style={{
-                fontSize: 18,
-                fontWeight: 'bold'
+                fontSize: 14,
               }}>Followers</Text>
             </TouchableOpacity>
           </View>
@@ -275,8 +286,7 @@ export default function profile() {
               }}
             >
               <Text style={{
-                fontSize: 18, 
-                fontWeight: 'bold'
+                fontSize: 14, 
               }}>Following</Text>
             </TouchableOpacity>
           </View>
@@ -435,21 +445,33 @@ export default function profile() {
               alignItems: "center",
             }}
           >
+            <View style={{
+              flexDirection: 'row',
+              width: '100%',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottomWidth: 1,
+              borderColor: "#ccc",
+              paddingBottom: 10
+            }}>
+            <Text style={{ fontSize: 24, fontWeight: "bold", color: 'blue' }}>
+              {modelType === 'followers' ? 'Followers' : 'Following'}
+            </Text>
             <Feather
               name="x"
               size={30}
-              style={{ alignSelf: "flex-end" }}
               onPress={() => setFollowModal(false)}
             />
-            <Text style={{ fontSize: 22, fontWeight: "bold", marginBottom: 20 }}>
-              {modelType === 'followers' ? 'Followers' : 'Following'}
-            </Text>
-            <View>
+            </View>
+            <View style={{
+              marginTop: 20,
+              marginBottom: 10
+            }}>
               {followList.length > 0 ? (
                 followList.map((item, index) => (
                   <Text key={index} style={{
-                    marginBottom: 5,
-                    fontSize: 18,
+                    paddingBottom: 2,
+                    fontSize: 16,
                     textAlign: 'center'
                   }}>{item}</Text>
                 ))
@@ -479,28 +501,47 @@ export default function profile() {
             backgroundColor: "white",
             borderRadius: 10,
             padding: 20,
-            alignItems: "center",
           }}>
-            <Feather
+            <View style={{
+              flexDirection: 'row',
+              width: '100%',
+              alignItems: 'center',
+              justifyContent:'space-between',
+              borderBottomWidth: 1,
+              borderColor: "#ccc",
+              paddingBottom: 10
+            }}>
+              <Text style={{
+                fontSize: 24,
+                fontWeight: "bold",
+                color: 'blue'
+              }}>Post</Text>
+              <Feather
               name="x"
               size={30}
               style={{ alignSelf: "flex-end" }}
               onPress={() => setPostModal(false)}
             />
+            </View>
             <Text style={{
-              fontSize: 18,
-              fontWeight: "bold",
-              marginBottom: 10,
-            }}>{postData?.title}</Text>
+              paddingTop: 20,
+              paddingBottom: 10,
+              color: 'gray',
+              fontSize: 13
+            }}>{moment(postData?.timestamp).startOf('seconds').fromNow()}</Text>
             <Image source={{ uri: postData?.imageURL }} style={{
               width: "100%",
               height: 200,
               resizeMode: "cover",
               marginBottom: 10,
             }} />
+            <Text>{postData?.likes?.length} {postData?.likes?.length > 1 ? 'likes' : 'like'}</Text>
             <Text style={{
-              fontSize: 16,
-              textAlign: "center",
+              fontSize: 18,
+              fontWeight: "bold",
+            }}>{postData?.title}</Text>
+            <Text style={{
+              fontSize: 14,
               marginBottom: 20,
             }}>{postData?.description}</Text>
           </View>
