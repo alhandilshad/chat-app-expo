@@ -1,17 +1,19 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, FlatList, Image, StyleSheet, ScrollView, Animated, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, Image, StyleSheet, ScrollView, Animated, TouchableOpacity, Modal, Pressable } from 'react-native';
 import { useNavigation } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { collection, onSnapshot, query, orderBy, doc, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, updateDoc, getDocs } from 'firebase/firestore';
 import { auth, db } from '../../config/firebaseConfig';
-import { FontAwesome } from '@expo/vector-icons';
-import Entypo from '@expo/vector-icons/Entypo';
+import { FontAwesome, Entypo, Feather } from '@expo/vector-icons';
 import moment from 'moment'
 import { onAuthStateChanged } from 'firebase/auth';
 
 export default function Home() {
     const navigation = useNavigation();
     const [posts, setPosts] = useState([]);
+    const [likesNames, setlikesNames] = useState([]);
+    const [likesModal, setlikesModal] = useState(false);
+    const [userList, setUserList] = useState([]);
     const [currentUserEmail, setcurrentUserEmail] = useState('');
     const scaleAnimation = useRef(new Animated.Value(1)).current;
 
@@ -53,34 +55,43 @@ export default function Home() {
           .sort((a, b) => b.timestamp - a.timestamp);
         setPosts(sortedPosts);
       });
+
+      getUsers();
   
       return () => unsubscribe();
     }, []);
 
+    const getUsers = async () => {
+      const list = [];
+      const dbSnap = await getDocs(collection(db, "users"));
+      dbSnap.forEach((doc) => {
+        list.push(doc.data());
+      });
+      setUserList(list);
+    };
+
     const toggleLike = async (postId, currentLikes) => {
       if (!currentUserEmail) return;
-
+  
       const postRef = doc(db, "Posts", postId);
-      const isLiked = currentLikes.includes(currentUserEmail);
+      const isLiked = currentLikes.includes(userList.filter((user) => user.email === currentUserEmail)[0].name);
+  
       const updatedLikes = isLiked
-        ? currentLikes.filter((email) => email !== currentUserEmail)
-        : [...currentLikes, currentUserEmail];
-
+        ? currentLikes.filter((name) => name !== userList.filter((user) => user.email === currentUserEmail)[0].name)
+        : [...currentLikes, userList.filter((user) => user.email === currentUserEmail)[0].name];
+  
       try {
         await updateDoc(postRef, { likes: updatedLikes });
-        // Update the local state of posts to reflect the change
-        setPosts((prevPosts) => 
-          prevPosts.map((post) =>
-            post.id === postId ? { ...post, likes: updatedLikes } : post
-          )
-        );
+
+        setPosts((prevPosts) => prevPosts.map((post) => post.id === postId ? { ...post, likes: updatedLikes } : post ) );
       } catch (error) {
         console.error("Error updating likes:", error);
       }
     };
 
     const renderPost = ({ item }) => {
-      const isLiked = item.likes.includes(currentUserEmail);
+      const currentUserName = userList.find((user) => user.email === currentUserEmail)?.name;
+      const isLiked = item.likes.includes(currentUserName);
 
       const handleLikePress = () => {
         toggleLike(item.id, item.likes);
@@ -140,20 +151,31 @@ export default function Home() {
               <Entypo name="dots-three-horizontal" size={20} color="black" />
             </View>
           </View>
-          <View>
+          <Pressable onPress={handleLikePress}>
             <Image source={{ uri: item?.imageURL }} style={{
               width: '100%',
               height: 200,
               borderRadius: 10,
               marginTop: 10
             }}></Image>
-          </View>
-          <TouchableOpacity onPress={handleLikePress} style={{ marginTop: 4 }} activeOpacity={0.7}>
+          </Pressable>
+          <View style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginTop: 5
+          }}>
+            <TouchableOpacity onPress={handleLikePress} activeOpacity={0.7}>
             <Animated.View style={{ transform: [{ scale: scaleAnimation }] }}>
-              <FontAwesome name={isLiked ? 'heart' : 'heart-o'} size={25} color={isLiked ? 'red' : 'black'} />
+              <FontAwesome name={isLiked ? 'heart' : 'heart-o'} size={24} color={isLiked ? 'red' : 'black'} />
             </Animated.View>
           </TouchableOpacity>
-          <TouchableOpacity>
+          <Feather name="bookmark" size={24} color="black" />
+          </View>
+          <TouchableOpacity onPress={() => {
+            setlikesModal(true)
+            setlikesNames(item?.likes)
+          }}>
             <Text>{item?.likes?.length} {item?.likes?.length > 1 ? 'likes' : 'like'}</Text>
           </TouchableOpacity>
           <Text style={{
@@ -174,6 +196,68 @@ export default function Home() {
               keyExtractor={(item) => item.id}
               showsVerticalScrollIndicator={false}
           />
+
+<Modal
+        animationType="slide"
+        transparent={true}
+        visible={likesModal}
+        onRequestClose={() => setlikesModal(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+          }}
+        >
+          <View
+            style={{
+              width: "80%",
+              padding: 20,
+              backgroundColor: "white",
+              borderRadius: 10,
+              alignItems: "center",
+            }}
+          >
+            <View style={{
+              width: '100%',
+              flexDirection: "row",
+              justifyContent: "space-between",
+              paddingBottom: 10,
+              alignItems: "center",
+              borderBottomWidth: 1,
+              borderColor: "#ccc"
+            }}>
+            <Text style={{ fontSize: 24, fontWeight: "bold", color: 'blue' }}>
+              Likes
+            </Text>
+            <Feather
+              name="x"
+              size={30}
+              style={{ alignSelf: "flex-end" }}
+              onPress={() => setlikesModal(false)}
+            />
+            </View>
+            <View style={{
+              marginBottom: 10,
+              marginTop: 20,
+            }}>
+              {likesNames.length > 0 ? (
+                likesNames.map((item, index) => (
+                  <Text key={index} style={{
+                    fontSize: 16,
+                    paddingBottom: 2,
+                    textAlign: 'center'
+                  }}>{item}</Text>
+                ))
+              ) : (
+                <Text>No Likes yet</Text>
+              )}
+            </View>
+          </View>
+        </View>
+      </Modal>
       </ScrollView>
   );
 }
