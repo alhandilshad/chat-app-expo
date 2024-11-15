@@ -79,8 +79,8 @@ export default function Message() {
           marginRight: 12
         }} 
         source={
-          item.profileImg 
-            ? { uri: item.profileImg } 
+          item?.profileImg 
+            ? { uri: item?.profileImg } 
             : item.gender === 'Male' 
             ? require('../../assets/images/download.jpg') 
             : require('../../assets/images/download (1).jpg')

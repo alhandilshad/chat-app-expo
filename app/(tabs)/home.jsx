@@ -17,8 +17,6 @@ export default function Home() {
     const [currentUserEmail, setcurrentUserEmail] = useState('');
     const scaleAnimation = useRef(new Animated.Value(1)).current;
 
-    console.log(posts)
-
     useEffect(() => {
         navigation.setOptions({
             header: () => (
@@ -63,14 +61,18 @@ export default function Home() {
       return () => unsubscribe();
     }, []);
 
-    const getUsers = async () => {
-      const list = [];
-      const dbSnap = await getDocs(collection(db, "users"));
-      dbSnap.forEach((doc) => {
-        list.push(doc.data());
-      });
-      setUserList(list);
-    };
+    const getUsers = () => {
+  const unsubscribe = onSnapshot(collection(db, "users"), (dbSnap) => {
+    const list = [];
+    dbSnap.forEach((doc) => {
+      list.push(doc.data());
+    });
+    setUserList(list);
+  });
+
+  // Return the unsubscribe function in case you want to stop listening to the updates later
+  return unsubscribe;
+};
 
     const toggleLike = async (postId, currentLikes) => {
       if (!currentUserEmail) return;
@@ -92,15 +94,12 @@ export default function Home() {
     };
 
     const renderPost = ({ item }) => {
-      console.log(item, 'hunain');
-      
       const currentUserName = userList.find((user) => user.email === currentUserEmail)?.name;
       const isLiked = item.likes.includes(currentUserName);
+      const currentUserProfile = userList.find((user) => user.name === item.posterName)?.profileImg;
 
       const handleLikePress = () => {
         toggleLike(item.id, item.likes);
-        
-        // Animate the "pop" effect
         scaleAnimation.setValue(1);
         Animated.sequence([
           Animated.timing(scaleAnimation, {
@@ -137,7 +136,7 @@ export default function Home() {
                 backgroundColor: 'lightgray',
                 borderWidth: 0.5,
                 borderColor: 'blue'
-              }} source={item?.posterProfile !== '' ? { uri: item?.posterProfile } : item?.posterGender === 'Male' ? require('../../assets/images/download.jpg') : require('../../assets/images/download (1).jpg') }></Image>
+              }} source={currentUserProfile ? { uri: currentUserProfile } : item?.posterGender === 'Male' ? require('../../assets/images/download.jpg') : require('../../assets/images/download (1).jpg') }></Image>
   
               <View>
               <Text style={{
