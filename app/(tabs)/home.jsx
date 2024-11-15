@@ -133,7 +133,7 @@ export default function Home() {
                 backgroundColor: 'lightgray',
                 borderWidth: 0.5,
                 borderColor: 'blue'
-              }} source={item?.posterProfile ? { uri: item?.posterProfile } : item?.posterGender === 'Male' ? require('../../assets/images/download.jpg') : require('../../assets/images/download (1).jpg') }></Image>
+              }} source={item?.posterProfile !== '' ? { uri: item?.posterProfile } : item?.posterGender === 'Male' ? require('../../assets/images/download.jpg') : require('../../assets/images/download (1).jpg') }></Image>
   
               <View>
               <Text style={{

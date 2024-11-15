@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, Image, FlatList, TextInput } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { useNavigation } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../../config/firebaseConfig';
@@ -12,6 +12,8 @@ export default function Message() {
   const [currentUserEmail, setCurrentUserEmail] = useState('');
   const [userlist, setUserlist] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const router = useRouter()
 
   useEffect(() => {
     navigation.setOptions({
@@ -59,7 +61,12 @@ export default function Message() {
         paddingVertical: 8,
         paddingHorizontal: 20,
       }}
-      onPress={() => console.log(`Clicked on ${item.name}`)}
+      onPress={() => router.push({
+        pathname: '/otherScreens/chat',
+        params: {
+          chatData: JSON.stringify(item)
+        }
+      })}
     >
       <Image 
         style={{
