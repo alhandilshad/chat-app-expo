@@ -17,6 +17,8 @@ export default function Home() {
     const [currentUserEmail, setcurrentUserEmail] = useState('');
     const scaleAnimation = useRef(new Animated.Value(1)).current;
 
+    console.log(posts)
+
     useEffect(() => {
         navigation.setOptions({
             header: () => (
@@ -90,6 +92,8 @@ export default function Home() {
     };
 
     const renderPost = ({ item }) => {
+      console.log(item, 'hunain');
+      
       const currentUserName = userList.find((user) => user.email === currentUserEmail)?.name;
       const isLiked = item.likes.includes(currentUserName);
 

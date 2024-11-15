@@ -7,6 +7,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../../config/firebaseConfig';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
+
 export default function Chat() {
   const searchParams = useLocalSearchParams();
   const chatUser = JSON.parse(searchParams.chatData);
