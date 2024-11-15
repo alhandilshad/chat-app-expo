@@ -91,7 +91,6 @@ export default function Message() {
     </TouchableOpacity>
   );
 
-  // Filtered user list based on search query
   const filteredUserList = userlist.filter((user) => 
     user.name.toLowerCase().includes(searchQuery.toLowerCase()) && user.email !== currentUserEmail
   );
