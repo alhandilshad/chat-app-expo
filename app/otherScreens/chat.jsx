@@ -229,8 +229,8 @@ const styles = StyleSheet.create({
     paddingBottom: 20
   },
   messageContainer: {
-    marginVertical: 5, // Minimal vertical spacing between messages
-    maxWidth: '90%', // Limits message width for better UI
+    marginVertical: 5,
+    maxWidth: '90%',
   },
   messageSent: {
     padding: 10,
