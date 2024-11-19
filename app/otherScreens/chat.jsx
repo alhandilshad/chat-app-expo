@@ -168,12 +168,17 @@ export default function Chat() {
             </Text>
           </LinearGradient>
         ) : (
+          <>
+          <View style={{ flexDirection: 'row' }}>
+          <Text>alhan</Text>
           <View style={styles.messageReceived}>
             <Text style={[styles.messageText, { color: 'black' }]}>{item.message}</Text>
             <Text style={[styles.timestamp, { color: '#999' }]}>
               {moment(item.timestamp).format('hh:mm A')}
             </Text>
           </View>
+          </View>
+          </>
         )}
       </ScrollView>
     );
@@ -224,7 +229,7 @@ const styles = StyleSheet.create({
   },
   messageList: {
     flexGrow: 1,
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
     paddingTop: 80,
     paddingBottom: 20
   },
@@ -234,11 +239,15 @@ const styles = StyleSheet.create({
   },
   messageSent: {
     padding: 10,
-    borderRadius: 20,
+    borderTopRightRadius: 20,
+    borderTopLeftRadius: 20,
+    borderBottomLeftRadius: 20
   },
   messageReceived: {
     padding: 10,
-    borderRadius: 20,
+    borderTopRightRadius: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
     backgroundColor: '#fff',
   },
   timestamp: {
