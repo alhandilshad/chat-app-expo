@@ -209,16 +209,18 @@ export default function profile() {
         <Text style={{ fontWeight: "bold", fontSize: 22, marginTop: 80 }}>
           {profileUser?.name}
         </Text>
-        <Text style={{ fontSize: 18, color: "gray" }}>
-          {profileUser?.email}
-        </Text>
+        {profileUser?.userName && (
+          <Text style={{ fontSize: 18, color: "gray" }}>
+            {profileUser?.userName}
+          </Text>
+        )}
         <Text
           style={{
             fontSize: 16,
             marginTop: 5,
           }}
         >
-          {profileUser?.bio
+          {profileUser?.bio !== ''
             ? profileUser?.bio
             : profileUser?.gender === "Male"
             ? "I am a boy"

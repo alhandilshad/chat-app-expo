@@ -11,12 +11,13 @@ import {
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { onSnapshot, collection, where, query, updateDoc, doc } from "firebase/firestore";
+import { onSnapshot, collection, where, query, updateDoc, doc, addDoc, getDocs } from "firebase/firestore";
 import { db, auth } from "../../config/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import GradientButton from "../../components/GradientButton";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Feather } from "@expo/vector-icons";
+import moment from "moment";
 
 export default function profile() {
   const navigation = useNavigation();
@@ -29,6 +30,12 @@ export default function profile() {
   const [editModal, setEditModal] = useState(false);
   const [userName, setUserName] = useState();
   const [bio, setBio] = useState();
+  const [postTitle, setPostTitle] = useState();
+  const [postDescription, setPostDescription] = useState();
+  const [postImageUrl, setPostImageUrl] = useState();
+  const [posts, setPosts] = useState([]);
+  const [showPostModal, setShowPostModal] = useState(false);
+  const [showPostData, setShowPostData] = useState([]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -75,12 +82,55 @@ export default function profile() {
     return () => unsubscribe();
   }, [currentUserUid]);
 
+  useEffect(() => {
+    const q = query(
+      collection(db, "Posts"),
+      where("userId", "==", currentUserUid)
+    );
+
+    const messageUnsubscribe = onSnapshot(q, (docSnap) => {
+      const list = [];
+      docSnap.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() });
+      });
+      const sortList = list.sort((a, b) => b.timestamp - a.timestamp);
+      setPosts(sortList);
+    });
+
+    return () => {
+      messageUnsubscribe();
+    };
+  }, [currentUserUid]);
+
   const handleEditProfile = () => {
     updateDoc(doc(db, "users", currentUserUid), {
       userName: userName,
       bio: bio,
     });
     setEditModal(false);
+  }
+
+  const handleCreatePost = () => {
+    if (!postTitle ||!postDescription ||!postImageUrl) {
+      ToastAndroid.show("Please fill all fields", ToastAndroid.SHORT);
+      return;
+    }
+
+    addDoc(collection(db, "Posts"), {
+      title: postTitle,
+      description: postDescription,
+      imageURL: postImageUrl,
+      posterName: currentUserData?.name,
+      posterGender: currentUserData?.gender,
+      userId: currentUserUid,
+      likes: [],
+      timestamp: Date.now(),
+    });
+
+    setModalVisible(false);
+    setPostTitle('');
+    setPostDescription('');
+    setPostImageUrl('');
   }
 
   return (
@@ -117,6 +167,11 @@ export default function profile() {
         <Text style={{ fontWeight: "bold", fontSize: 22, marginTop: 80 }}>
           {currentUserData?.name}
         </Text>
+        {currentUserData?.userName !== '' && (
+          <Text style={{ fontWeight: "bold", fontSize: 18, }}>
+            {currentUserData?.userName}
+          </Text>
+        )}
         <Text style={{ fontSize: 18, color: 'gray' }}>
           {currentUserData?.email}
         </Text>
@@ -128,7 +183,7 @@ export default function profile() {
         <View style={{
           display: 'flex',
           flexDirection: 'row',
-          justifyContent:'space-around',
+          justifyContent:'space-evenly',
           marginTop: 20,
           width: '100%',
           marginBottom: 20
@@ -145,10 +200,19 @@ export default function profile() {
               setfollowList(currentUserData?.followers || []);
             }} >
             <Text style={{
-              fontWeight: 'bold',
-              fontSize: 18
+              fontSize: 14
             }}>Followers</Text>
             </TouchableOpacity>
+          </View>
+          <View>
+            <Text style={{
+              textAlign: 'center',
+              fontWeight: 'bold',
+              fontSize: 24
+            }}>{posts?.length}</Text>
+            <Text style={{
+              fontSize: 14
+            }}>Posts</Text>
           </View>
           <View>
             <Text style={{
@@ -164,8 +228,7 @@ export default function profile() {
               }}
             >
             <Text style={{
-              fontWeight: 'bold',
-              fontSize: 18
+              fontSize: 14
             }}>Following</Text>
             </TouchableOpacity>
           </View>
@@ -174,7 +237,11 @@ export default function profile() {
         <View style={{
           width: '80%'
         }}>
-        <GradientButton text='Edit Profile' PV={10} click={() => setEditModal(true)} />
+        <GradientButton text='Edit Profile' PV={10} click={() => {
+          setEditModal(true);
+          setUserName(currentUserData?.userName);
+          setBio(currentUserData?.bio);
+        }} />
         </View>
 
         <View style={{
@@ -201,12 +268,26 @@ export default function profile() {
           flexDirection: 'row',
           flexWrap: 'wrap',
           marginTop: 10,
-          marginBottom: 50,
+          marginBottom: 30,
           width: '80%'
         }}>
-          <View style={{width: '33%', height: 80, borderWidth: 1, borderColor: 'black'}}></View>
-          <View style={{width: '33%', height: 80, borderWidth: 1, borderColor: 'black'}}></View>
-          <View style={{width: '33%', height: 80, borderWidth: 1, borderColor: 'black'}}></View>
+          {posts?.map((post, index) => (
+            <TouchableOpacity onPress={() => {
+              setShowPostModal(true)
+              setShowPostData(post);
+            }} style={{
+              width: '33%',
+              height: 80
+            }} key={index}>
+              <Image
+                source={{ uri: post.imageURL }}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                }}
+              />
+            </TouchableOpacity>
+          ))}
         </View>
 
         <View style={{
@@ -258,27 +339,44 @@ export default function profile() {
                 style={{
                   width: '100%',
                   borderWidth: 1,
-                  borderColor: 'gray',
+                  borderColor: 'blue',
                   borderRadius: 5,
                   padding: 10,
                   marginTop: 15
                 }}
+                value={postTitle}
+                onChangeText={setPostTitle}
               />
               <TextInput
                 placeholder="Description"
                 style={{
                   width: '100%',
                   borderWidth: 1,
-                  borderColor: 'gray',
+                  borderColor: 'blue',
                   borderRadius: 5,
                   padding: 10,
                   marginTop: 15
                 }}
                 multiline
                 numberOfLines={4}
+                value={postDescription}
+                onChangeText={setPostDescription}
+              />
+              <TextInput
+                placeholder="Image Url"
+                style={{
+                  width: '100%',
+                  borderWidth: 1,
+                  borderColor: 'blue',
+                  borderRadius: 5,
+                  padding: 10,
+                  marginTop: 15
+                }}
+                value={postImageUrl}
+                onChangeText={setPostImageUrl}
               />
               <View style={{ width: '60%', marginTop: 20 }}>
-                <GradientButton text='Create Post' PV={10} />
+                <GradientButton text='Create Post' PV={8} click={handleCreatePost} />
               </View>
             </View>
           </View>
@@ -474,6 +572,130 @@ export default function profile() {
         marginTop: 20
       }}>
       <GradientButton text='Edit' PV={7} click={handleEditProfile} />
+      </View>
+    </View>
+  </View>
+</Modal>
+
+    {/* show post modal */}
+    <Modal
+  animationType="slide"
+  transparent={true}
+  visible={showPostModal}
+  onRequestClose={() => setShowPostModal(false)}
+>
+  <View
+    style={{
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+    }}
+  >
+    <View
+      style={{
+        width: "80%",
+        padding: 20,
+        backgroundColor: "white",
+        borderRadius: 10,
+        alignItems: "center",
+      }}
+    >
+      {/* Modal Header */}
+      <View
+        style={{
+          flexDirection: "row",
+          width: "100%",
+          alignItems: "center",
+          justifyContent: "space-between",
+          borderBottomWidth: 1,
+          borderColor: "#ccc",
+          paddingBottom: 10,
+        }}
+      >
+        <Text style={{ fontSize: 24, fontWeight: "bold", color: "blue" }}>
+          Post
+        </Text>
+        <Feather
+          name="x"
+          size={30}
+          onPress={() => setShowPostModal(false)}
+        />
+      </View>
+
+      <View>
+      <Text style={{
+        marginTop: 10,
+        fontSize: 14,
+      }}>{moment(showPostData?.timestamp).startOf('seconds').fromNow()}</Text>
+      </View>
+
+      <Image style={{
+        width: "100%",
+        height: 200,
+        marginTop: 10
+      }} source={{ uri: showPostData?.imageURL }}></Image>
+
+      {/* Username Input */}
+      <View
+        style={{
+          marginTop: 20,
+          width: "100%",
+        }}
+      >
+        <TextInput
+          style={{
+            width: "100%",
+            borderWidth: 1,
+            borderColor: "blue",
+            borderRadius: 5,
+            padding: 8,
+            fontSize: 15,
+          }}
+          value={showPostData?.title}
+          onChangeText={(text) => {
+            setShowPostData({
+              ...showPostData,
+              title: text,
+            });
+          }}
+        />
+      </View>
+      <View
+        style={{
+          width: "100%",
+          marginTop: 10,
+        }}
+      >
+        <TextInput
+          style={{
+            width: "100%",
+            borderWidth: 1,
+            borderColor: "blue",
+            borderRadius: 5,
+            padding: 8,
+            fontSize: 15,
+          }}
+          value={showPostData?.description}
+          onChangeText={(text) => {
+            setShowPostData({
+              ...showPostData,
+              description: text,
+            });
+          }}
+        />
+      </View>
+
+      <View style={{
+        flexDirection: 'row'
+      }}>
+        <TouchableOpacity>
+          <Text>Delete Post</Text>
+        </TouchableOpacity>
+
+        <View style={{ width: '45%' }}>
+        <GradientButton text='Edit Post' PV={8} />
+        </View>
       </View>
     </View>
   </View>
