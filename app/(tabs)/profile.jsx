@@ -23,6 +23,9 @@ export default function profile() {
   const [currentUserData, setCurrentUserData] = useState();
   const [currentUserUid, setCurrentUserUid] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [followModal, setFollowModal] = useState(false);
+  const [modelType, setModelType] = useState();
+  const [followList, setfollowList] = useState([]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -125,10 +128,16 @@ export default function profile() {
               fontWeight: 'bold',
               fontSize: 24
             }}>{currentUserData?.followers?.length}</Text>
+            <TouchableOpacity onPress={() => {
+              setFollowModal(true)
+              setModelType("followers");
+              setfollowList(currentUserData?.followers || []);
+            }} >
             <Text style={{
               fontWeight: 'bold',
               fontSize: 18
             }}>Followers</Text>
+            </TouchableOpacity>
           </View>
           <View>
             <Text style={{
@@ -136,10 +145,18 @@ export default function profile() {
               fontWeight: 'bold',
               fontSize: 24
             }}>{currentUserData?.following?.length}</Text>
+            <TouchableOpacity 
+               onPress={() => {
+                setFollowModal(true)
+                setModelType("following");
+                setfollowList(currentUserData?.following || []);
+              }}
+            >
             <Text style={{
               fontWeight: 'bold',
               fontSize: 18
             }}>Following</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -255,6 +272,68 @@ export default function profile() {
             </View>
           </View>
         </Modal>
+
+        {/* followers and following modal */}
+        <Modal
+        animationType="slide"
+        transparent={true}
+        visible={followModal}
+        onRequestClose={() => setFollowModal(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+          }}
+        >
+          <View
+            style={{
+              width: "80%",
+              padding: 20,
+              backgroundColor: "white",
+              borderRadius: 10,
+              alignItems: "center",
+            }}
+          >
+            <View style={{
+              flexDirection: 'row',
+              width: '100%',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottomWidth: 1,
+              borderColor: "#ccc",
+              paddingBottom: 10
+            }}>
+            <Text style={{ fontSize: 24, fontWeight: "bold", color: 'blue' }}>
+              {modelType === 'followers' ? 'Followers' : 'Following'}
+            </Text>
+            <Feather
+              name="x"
+              size={30}
+              onPress={() => setFollowModal(false)}
+            />
+            </View>
+            <View style={{
+              marginTop: 20,
+              marginBottom: 10
+            }}>
+              {followList.length > 0 ? (
+                followList.map((item, index) => (
+                  <Text key={index} style={{
+                    paddingBottom: 2,
+                    fontSize: 16,
+                    textAlign: 'center'
+                  }}>{item}</Text>
+                ))
+              ) : (
+                <Text>No {modelType} yet</Text>
+              )}
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
