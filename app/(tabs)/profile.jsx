@@ -11,7 +11,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { onSnapshot, collection, where, query } from "firebase/firestore";
+import { onSnapshot, collection, where, query, updateDoc, doc } from "firebase/firestore";
 import { db, auth } from "../../config/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import GradientButton from "../../components/GradientButton";
@@ -27,6 +27,8 @@ export default function profile() {
   const [modelType, setModelType] = useState();
   const [followList, setfollowList] = useState([]);
   const [editModal, setEditModal] = useState(false);
+  const [userName, setUserName] = useState();
+  const [bio, setBio] = useState();
 
   useEffect(() => {
     navigation.setOptions({
@@ -73,6 +75,14 @@ export default function profile() {
     return () => unsubscribe();
   }, [currentUserUid]);
 
+  const handleEditProfile = () => {
+    updateDoc(doc(db, "users", currentUserUid), {
+      userName: userName,
+      bio: bio,
+    });
+    setEditModal(false);
+  }
+
   return (
     <ScrollView style={{
       backgroundColor: 'white',
@@ -113,7 +123,7 @@ export default function profile() {
         <Text style={{
             fontSize: 16,
             marginTop: 5
-        }}>{currentUserData?.bio ? currentUserData?.bio : currentUserData?.gender === 'Male' ? 'I am a boy' : 'I am a girl'}</Text>
+        }}>{currentUserData?.bio !== '' ? currentUserData?.bio : currentUserData?.gender === 'Male' ? 'I am a boy' : 'I am a girl'}</Text>
 
         <View style={{
           display: 'flex',
@@ -427,8 +437,8 @@ export default function profile() {
             fontSize: 15,
           }}
           placeholder="Enter your username"
-          value={''} // Bind to your state
-          onChangeText={''} // Replace with your state update function
+          value={userName} // Bind to your state
+          onChangeText={setUserName} // Replace with your state update function
         />
       </View>
 
@@ -452,8 +462,8 @@ export default function profile() {
             fontSize: 16,
           }}
           placeholder="Enter your bio"
-          value={''} // Bind to your state
-          onChangeText={''} // Replace with your state update function
+          value={bio} // Bind to your state
+          onChangeText={setBio} // Replace with your state update function
         />
       </View>
 
@@ -463,7 +473,7 @@ export default function profile() {
         width: '40%',
         marginTop: 20
       }}>
-      <GradientButton text='Edit' PV={7} />
+      <GradientButton text='Edit' PV={7} click={handleEditProfile} />
       </View>
     </View>
   </View>
