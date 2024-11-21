@@ -1,8 +1,8 @@
-import { View, Text, Image } from 'react-native'
-import React from 'react'
-import { LinearGradient } from 'expo-linear-gradient'
+import { View, Text, Image } from 'react-native';
+import React from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
-import GradientButton from '@/components/GradientButton'
+import GradientButton from '@/components/GradientButton';
 import { useRouter } from 'expo-router';
 
 export default function WelcomeScreen() {

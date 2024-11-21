@@ -149,10 +149,10 @@ export default function Chat() {
     const isSentMessage = item.senderUid === currentUserUid;
   
     return (
-      <ScrollView
+      <View
         style={[
           styles.messageContainer,
-          isSentMessage ? { alignSelf: 'flex-end' } : { alignSelf: 'flex-start' },
+          isSentMessage ? { alignSelf: 'flex-end' } : { alignSelf: 'flex-start' }
         ]}
       >
         {isSentMessage ? (
@@ -170,7 +170,26 @@ export default function Chat() {
         ) : (
           <>
           <View style={{ flexDirection: 'row' }}>
-          <Text>alhan</Text>
+          <Image
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: 12,
+                backgroundColor: 'lightgray',
+                borderWidth: 0.5,
+                borderColor: 'blue',
+                marginRight: 3,
+              }}
+              source={
+                chatUserData?.profileImg
+                  ? { uri: chatUserData.profileImg }
+                  : chatUser?.profileImg
+                    ? { uri: chatUser.profileImg }
+                    : chatUser?.gender === 'Male'
+                      ? require('../../assets/images/download.jpg')
+                      : require('../../assets/images/download (1).jpg')
+              }
+            />
           <View style={styles.messageReceived}>
             <Text style={[styles.messageText, { color: 'black' }]}>{item.message}</Text>
             <Text style={[styles.timestamp, { color: '#999' }]}>
@@ -180,7 +199,7 @@ export default function Chat() {
           </View>
           </>
         )}
-      </ScrollView>
+      </View>
     );
   };
   
