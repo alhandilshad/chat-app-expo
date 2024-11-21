@@ -26,6 +26,7 @@ export default function profile() {
   const [followModal, setFollowModal] = useState(false);
   const [modelType, setModelType] = useState();
   const [followList, setfollowList] = useState([]);
+  const [editModal, setEditModal] = useState(false);
 
   useEffect(() => {
     navigation.setOptions({
@@ -163,7 +164,7 @@ export default function profile() {
         <View style={{
           width: '80%'
         }}>
-        <GradientButton text='Edit Profile' PV={10} />
+        <GradientButton text='Edit Profile' PV={10} click={() => setEditModal(true)} />
         </View>
 
         <View style={{
@@ -334,6 +335,140 @@ export default function profile() {
           </View>
         </View>
       </Modal>
+
+      {/* edit profile modal */}
+      <Modal
+  animationType="slide"
+  transparent={true}
+  visible={editModal}
+  onRequestClose={() => setEditModal(false)}
+>
+  <View
+    style={{
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+    }}
+  >
+    <View
+      style={{
+        width: "80%",
+        padding: 20,
+        backgroundColor: "white",
+        borderRadius: 10,
+        alignItems: "center",
+      }}
+    >
+      {/* Modal Header */}
+      <View
+        style={{
+          flexDirection: "row",
+          width: "100%",
+          alignItems: "center",
+          justifyContent: "space-between",
+          borderBottomWidth: 1,
+          borderColor: "#ccc",
+          paddingBottom: 10,
+        }}
+      >
+        <Text style={{ fontSize: 24, fontWeight: "bold", color: "blue" }}>
+          Edit Profile
+        </Text>
+        <Feather
+          name="x"
+          size={30}
+          onPress={() => setEditModal(false)}
+        />
+      </View>
+
+      {/* Profile Image and Change Photo Button */}
+      <View style={{ alignItems: "center", marginTop: 20, width: '100%' }}>
+      <Image
+          source={
+            currentUserData?.gender === "Male"
+              ? require("../../assets/images/download.jpg")
+              : require("../../assets/images/download (1).jpg")
+          }
+          style={{
+            width: 100,
+            height: 100,
+            borderRadius: 50,
+            backgroundColor: 'lightgray',
+            borderWidth: 0.5,
+            borderColor: 'blue'
+          }}
+        ></Image>
+        <View style={{
+          width: "60%",
+          marginTop: 10,
+        }}>
+        <GradientButton text={'change photo'} PV={6} FS={16} />
+        </View>
+      </View>
+
+      {/* Username Input */}
+      <View
+        style={{
+          marginTop: 20,
+          width: "100%",
+        }}
+      >
+        <Text style={{ marginBottom: 5, fontSize: 16 }}>
+          Username
+        </Text>
+        <TextInput
+          style={{
+            width: "100%",
+            borderWidth: 1,
+            borderColor: "blue",
+            borderRadius: 5,
+            padding: 8,
+            fontSize: 15,
+          }}
+          placeholder="Enter your username"
+          value={''} // Bind to your state
+          onChangeText={''} // Replace with your state update function
+        />
+      </View>
+
+      {/* Bio Input */}
+      <View
+        style={{
+          marginTop: 20,
+          width: "100%",
+        }}
+      >
+        <Text style={{ marginBottom: 5, fontSize: 16 }}>
+          Bio
+        </Text>
+        <TextInput
+          style={{
+            width: "100%",
+            borderWidth: 1,
+            borderColor: "blue",
+            borderRadius: 5,
+            padding: 10,
+            fontSize: 16,
+          }}
+          placeholder="Enter your bio"
+          value={''} // Bind to your state
+          onChangeText={''} // Replace with your state update function
+        />
+      </View>
+
+      {/* Save Button */}
+      <View style={{
+        alignSelf: 'flex-end',
+        width: '40%',
+        marginTop: 20
+      }}>
+      <GradientButton text='Edit' PV={7} />
+      </View>
+    </View>
+  </View>
+</Modal>
+
     </ScrollView>
   );
 }
