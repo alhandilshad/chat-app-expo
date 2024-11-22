@@ -6,14 +6,15 @@ import {
   Image,
   ToastAndroid,
   ScrollView,
-  Modal
+  Modal,
+  Alert
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import { useNavigation } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { onSnapshot, collection, where, query, updateDoc, doc, addDoc, getDocs } from "firebase/firestore";
+import { onSnapshot, collection, where, query, updateDoc, doc, addDoc, getDocs, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../../config/firebaseConfig";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, deleteUser } from "firebase/auth";
 import GradientButton from "../../components/GradientButton";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Feather } from "@expo/vector-icons";
@@ -21,6 +22,8 @@ import moment from "moment";
 
 export default function profile() {
   const navigation = useNavigation();
+  const router = useRouter();
+  const [currUser, setCurrUser] = useState();
   const [currentUserData, setCurrentUserData] = useState();
   const [currentUserUid, setCurrentUserUid] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
@@ -57,6 +60,7 @@ export default function profile() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
+        setCurrUser(user);
         setCurrentUserUid(user.uid);
       } else {
         console.log("User is signed out");
@@ -131,6 +135,61 @@ export default function profile() {
     setPostTitle('');
     setPostDescription('');
     setPostImageUrl('');
+  }
+
+  const handleEditPost = (id, title, description) => {
+    updateDoc(doc(db, "Posts", id), {
+      title: title,
+      description: description,
+    });
+    setShowPostModal(false);
+  }
+
+  const handleDeletePost = (id) => {
+    deleteDoc(doc(db, "Posts", id));
+    setShowPostModal(false);
+  }
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Logout",
+      "Are you sure you want to logout?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        { text: "Logout", onPress: handleConfirmLogout },
+      ],
+      { cancelable: false }
+    );
+  }
+
+  const handleConfirmLogout = () => {
+    auth.signOut();
+    router.replace("/auth/sign-in");
+  }
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "Delete Account",
+      "Are you sure you want to delete your account?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        { text: "Delete", onPress: handleConfirmDeleteAccount },
+      ],
+      { cancelable: false }
+    );
+  }
+
+  const handleConfirmDeleteAccount = async () => {
+    await deleteUser(currUser);
+    deleteDoc(doc(db, "users", currentUserUid));
+    auth.signOut();
+    router.replace("/auth/sign-up");
   }
 
   return (
@@ -271,32 +330,42 @@ export default function profile() {
           marginBottom: 30,
           width: '80%'
         }}>
-          {posts?.map((post, index) => (
-            <TouchableOpacity onPress={() => {
-              setShowPostModal(true)
-              setShowPostData(post);
-            }} style={{
-              width: '33%',
-              height: 80
-            }} key={index}>
-              <Image
-                source={{ uri: post.imageURL }}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                }}
-              />
-            </TouchableOpacity>
-          ))}
+          {posts.length > 0 ? (
+            posts?.map((post, index) => (
+              <TouchableOpacity onPress={() => {
+                setShowPostModal(true)
+                setShowPostData(post);
+              }} style={{
+                width: '33%',
+                height: 80
+              }} key={index}>
+                <Image
+                  source={{ uri: post.imageURL }}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                  }}
+                />
+              </TouchableOpacity>
+            ))
+          ) : (
+            <View style={{
+              width: '100%'
+            }}>
+               <Text style={{
+              textAlign: 'center'
+            }}>No posts yet</Text>
+            </View>
+          )}
         </View>
 
         <View style={{
           width: '80%'
         }}>
-        <GradientButton text='Logout' PV={10} />
+        <GradientButton text='Logout' PV={10} click={handleLogout} />
         </View>
 
-        <TouchableOpacity style={{
+        <TouchableOpacity onPress={handleDeleteAccount} style={{
           width: '80%',
           borderWidth: 2,
           borderColor: 'red',
@@ -623,10 +692,14 @@ export default function profile() {
         />
       </View>
 
-      <View>
+      <View style={{
+        alignItems: 'flex-start',
+        width: '100%',
+        marginTop: 10
+      }}>
       <Text style={{
-        marginTop: 10,
-        fontSize: 14,
+        fontSize: 13,
+        color: 'gray',
       }}>{moment(showPostData?.timestamp).startOf('seconds').fromNow()}</Text>
       </View>
 
@@ -687,14 +760,29 @@ export default function profile() {
       </View>
 
       <View style={{
-        flexDirection: 'row'
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 20
       }}>
-        <TouchableOpacity>
-          <Text>Delete Post</Text>
+        <TouchableOpacity onPress={() => handleDeletePost(showPostData?.id)} style={{
+          width: '45%',
+          borderWidth: 2,
+          borderColor: 'red',
+          padding: 5,
+          borderRadius: 10,
+        }}>
+          <Text style={{
+            textAlign: 'center',
+            color: 'red',
+            fontWeight: 'bold',
+            fontSize: 16,
+          }}>Delete Post</Text>
         </TouchableOpacity>
 
         <View style={{ width: '45%' }}>
-        <GradientButton text='Edit Post' PV={8} />
+          <GradientButton text='Edit Post' PV={7} FS={16} click={() => handleEditPost(showPostData?.id, showPostData?.title, showPostData?.description)} />
         </View>
       </View>
     </View>
